@@ -3,7 +3,7 @@ import os
 
 from flask import Flask, jsonify, request, send_from_directory
 
-import anthropic
+from openai import OpenAI
 
 app = Flask(__name__, static_folder="static", static_url_path="")
 
@@ -36,7 +36,8 @@ Trecho da matricula:
 \"\"\"
 """
 
-MODEL = os.environ.get("EXTRACAO_MODEL", "claude-sonnet-4-6")
+MODEL = os.environ.get("EXTRACAO_MODEL", "gpt-5.6-luna")
+OPENCODE_BASE_URL = "https://opencode.ai/zen/go/v1"
 MAX_CHARS = 6000
 
 _client = None
@@ -45,8 +46,8 @@ _client = None
 def get_client():
     global _client
     if _client is None:
-        # Le ANTHROPIC_API_KEY do ambiente, nunca de um valor fixo no codigo.
-        _client = anthropic.Anthropic()
+        # Le OPENCODE_API_KEY do ambiente, nunca de um valor fixo no codigo.
+        _client = OpenAI(api_key=os.environ.get("OPENCODE_API_KEY"), base_url=OPENCODE_BASE_URL)
     return _client
 
 
@@ -69,17 +70,15 @@ def extract():
     )
 
     try:
-        resposta = get_client().messages.create(
+        resposta = get_client().responses.create(
             model=MODEL,
-            max_tokens=500,
-            messages=[{"role": "user", "content": prompt}],
+            max_output_tokens=500,
+            input=prompt,
         )
     except Exception as exc:  # falha de rede, chave invalida, limite de uso, etc.
         return jsonify({"error": "falha ao chamar o modelo", "detail": str(exc)}), 502
 
-    bruto = "".join(
-        bloco.text for bloco in resposta.content if getattr(bloco, "type", "") == "text"
-    )
+    bruto = resposta.output_text
     inicio, fim = bruto.find("{"), bruto.rfind("}")
     if inicio == -1 or fim == -1:
         return jsonify({"error": "resposta sem JSON reconhecivel", "raw": bruto}), 502
