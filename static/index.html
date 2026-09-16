@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diligência de terras com IA, case re.green</title>
+<meta name="description" content="Plano de atuação como IA Product Owner na re.green, primeiros quatro meses.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --forest-900:#0d2818;
+    --forest-800:#123420;
+    --forest-700:#1a4128;
+    --cream-050:#faf6ec;
+    --cream-100:#f2e9d6;
+    --ink-900:#132016;
+    --ink-700:#3a4a3d;
+    --moss-500:#7ea86b;
+    --moss-400:#9dc17f;
+    --moss-dark:#3f6b45;
+    --line-on-dark:rgba(244,236,219,0.16);
+    --line-on-cream:rgba(19,32,22,0.14);
+    --risk-block:#b5533f;
+    --risk-warn:#c9963d;
+    --risk-ok:#5f9955;
+    --bg:var(--cream-050);
+    --fg:var(--ink-900);
+    --font-display:'Outfit', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --font-body:'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){ --bg:var(--forest-900); --fg:var(--cream-100); }
+  }
+  :root[data-theme="dark"]{ --bg:var(--forest-900); --fg:var(--cream-100); }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth; scroll-snap-type:y proximity;}
+  body{ margin:0; background:var(--bg); color:var(--fg); font-family:var(--font-body); overflow-x:hidden; }
+  ::selection{ background:var(--moss-400); color:var(--ink-900); }
+
+  h1,h2,h3{ font-family:var(--font-display); margin:0; letter-spacing:-0.01em; }
+
+  .progress{ position:fixed; top:0; left:0; height:3px; width:0%; background:var(--moss-400); z-index:60; transition:width .12s linear; }
+
+  .dotnav{ position:fixed; right:clamp(0.9rem,2.4vw,2.2rem); top:50%; transform:translateY(-50%); z-index:60; display:flex; flex-direction:column; gap:0.55rem; }
+  .dot{ width:9px; height:9px; border-radius:50%; border:1.5px solid rgba(150,150,150,0.55); background:transparent; padding:0; cursor:pointer; transition:background .2s,border-color .2s,transform .2s; }
+  .dot:hover{ transform:scale(1.25); }
+  .dot.active{ background:var(--moss-500); border-color:var(--moss-500); transform:scale(1.3); }
+  .dot:focus-visible{ outline:2px solid var(--moss-500); outline-offset:3px; }
+  @media (max-width: 720px){ .dotnav{ display:none; } }
+
+  main{ scroll-snap-type:y proximity; }
+
+  .slide{ min-height:100svh; display:flex; align-items:center; scroll-snap-align:start; padding:clamp(3.2rem,9vw,6rem) clamp(1.4rem,7vw,6.4rem); position:relative; }
+  .slide-dark{ background:var(--forest-900); color:var(--cream-100); }
+  .slide-cream{ background:var(--cream-050); color:var(--ink-900); }
+  .slide-cream .rule{ border-color:var(--line-on-cream); }
+  .slide-dark .rule{ border-color:var(--line-on-dark); }
+
+  .wrap{ max-width:1180px; margin:0 auto; width:100%; }
+
+  .eyebrow{ font-family:var(--font-body); font-size:0.72rem; font-weight:700; letter-spacing:0.13em; text-transform:uppercase; display:inline-flex; align-items:center; gap:0.55rem; margin-bottom:1.4rem; }
+  .slide-dark .eyebrow{ color:var(--moss-400); }
+  .slide-cream .eyebrow{ color:var(--moss-dark); }
+  .eyebrow .idx{ opacity:0.65; font-weight:600; }
+
+  .title{ font-family:var(--font-display); font-weight:600; font-size:clamp(1.7rem, 1.1rem + 2.6vw, 2.9rem); line-height:1.16; max-width:19ch; }
+  .title-hero{ font-weight:700; font-size:clamp(1.95rem, 1rem + 3.6vw, 3.6rem); max-width:22ch; line-height:1.12; }
+
+  p.lede{ font-size:clamp(1rem, 0.92rem + 0.35vw, 1.18rem); line-height:1.6; max-width:56ch; margin-top:1.3rem; font-weight:400; }
+  .slide-dark p.lede{ color:rgba(244,236,219,0.82); }
+  .slide-cream p.lede{ color:var(--ink-700); }
+
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:clamp(1.4rem,3vw,3rem); margin-top:2.4rem; }
+  @media (max-width:860px){ .grid2{ grid-template-columns:1fr; } }
+
+  .card{ border-radius:20px; padding:clamp(1.3rem,2.4vw,1.9rem); border:1px solid var(--line-on-dark); }
+  .slide-cream .card{ border-color:var(--line-on-cream); background:rgba(19,32,22,0.035); }
+  .slide-dark .card{ background:rgba(244,236,219,0.045); }
+  .card h3{ font-size:1.05rem; font-weight:600; margin-bottom:0.6rem; }
+  .card p{ font-size:0.96rem; line-height:1.55; margin:0; }
+  .slide-dark .card p{ color:rgba(244,236,219,0.78); }
+  .slide-cream .card p{ color:var(--ink-700); }
+
+  .statrow{ display:flex; flex-wrap:wrap; gap:clamp(1.6rem,4vw,3.4rem); margin-top:2.6rem; }
+  .stat .num{ font-family:var(--font-display); font-weight:700; font-size:clamp(2rem,1.2rem+3vw,3.1rem); line-height:1; }
+  .stat .lbl{ font-size:0.82rem; margin-top:0.5rem; max-width:16ch; line-height:1.35; }
+  .slide-dark .stat .lbl{ color:rgba(244,236,219,0.72); }
+  .slide-cream .stat .lbl{ color:var(--ink-700); }
+  .stat.flag .num{ color:var(--risk-block); }
+
+  table.dtable{ width:100%; border-collapse:collapse; margin-top:2rem; font-size:0.9rem; }
+  table.dtable th{ text-align:left; font-weight:600; font-size:0.72rem; letter-spacing:0.06em; text-transform:uppercase; padding:0 0.9rem 0.7rem 0; opacity:0.65; }
+  table.dtable td{ padding:0.7rem 0.9rem 0.7rem 0; border-top:1px solid var(--line-on-cream); vertical-align:top; }
+  .slide-dark table.dtable td{ border-color:var(--line-on-dark); }
+  .badge{ display:inline-flex; align-items:center; padding:0.22rem 0.65rem; border-radius:999px; font-size:0.72rem; font-weight:600; }
+  .badge-yes{ background:rgba(95,153,85,0.16); color:var(--risk-ok); }
+  .badge-part{ background:rgba(201,150,61,0.18); color:var(--risk-warn); }
+  .badge-no{ background:rgba(181,83,63,0.14); color:var(--risk-block); }
+
+  .steps{ display:flex; flex-direction:column; gap:0; margin-top:2.2rem; }
+  .step{ display:flex; gap:1.4rem; padding:1.15rem 0; border-top:1px solid var(--line-on-dark); }
+  .slide-cream .step{ border-color:var(--line-on-cream); }
+  .step:last-child{ border-bottom:1px solid var(--line-on-dark); }
+  .slide-cream .step:last-child{ border-color:var(--line-on-cream); }
+  .step .n{ font-family:var(--font-display); font-weight:700; font-size:1.05rem; min-width:2.4rem; opacity:0.55; }
+  .step .t{ font-weight:600; font-size:1rem; margin-bottom:0.25rem; }
+  .step .d{ font-size:0.92rem; line-height:1.5; max-width:56ch; }
+  .slide-dark .step .d{ color:rgba(244,236,219,0.75); }
+  .slide-cream .step .d{ color:var(--ink-700); }
+
+  .cta-box{ border-radius:20px; background:var(--moss-500); color:var(--ink-900); padding:clamp(1.3rem,2.6vw,2rem); margin-top:2.2rem; }
+  .cta-box p{ margin:0; font-size:1rem; line-height:1.55; font-weight:500; }
+
+  .flow{ display:flex; flex-wrap:wrap; align-items:center; gap:0.6rem; margin-top:2rem; }
+  .flow .node{ border:1px solid var(--line-on-dark); border-radius:14px; padding:0.75rem 1rem; font-size:0.86rem; font-weight:500; }
+  .slide-cream .flow .node{ border-color:var(--line-on-cream); }
+  .flow .node.hit{ border-color:var(--moss-400); background:rgba(157,193,127,0.1); }
+  .flow .arrow{ opacity:0.5; font-size:1rem; }
+  .flow-label{ font-size:0.72rem; text-transform:uppercase; letter-spacing:0.1em; font-weight:700; opacity:0.6; margin-top:1.6rem; margin-bottom:0.4rem; }
+  .flow-label:first-child{ margin-top:0; }
+
+  .reveal{ margin-top:2.4rem; max-width:760px; }
+  .reveal-track{ position:relative; height:150px; border-radius:18px; overflow:hidden; border:1px solid var(--line-on-cream); }
+  .reveal-layer{ position:absolute; inset:0; padding:1.4rem 1.6rem; display:flex; flex-direction:column; justify-content:center; }
+  .reveal-base{ background:var(--ink-900); color:var(--cream-100); }
+  .reveal-over{ background:var(--moss-500); color:var(--ink-900); clip-path:inset(0 50% 0 0); }
+  .reveal-layer .rk{ font-size:0.72rem; text-transform:uppercase; letter-spacing:0.1em; font-weight:700; opacity:0.7; margin-bottom:0.4rem; }
+  .reveal-layer .rt{ font-family:var(--font-display); font-weight:700; font-size:1.5rem; }
+  .reveal-layer .rd{ font-size:0.86rem; margin-top:0.3rem; max-width:32ch; opacity:0.85; }
+  .reveal-slider{ width:100%; margin-top:0.9rem; -webkit-appearance:none; appearance:none; height:4px; border-radius:999px; background:var(--line-on-cream); cursor:pointer; }
+  .reveal-slider::-webkit-slider-thumb{ -webkit-appearance:none; width:20px; height:20px; border-radius:50%; background:var(--moss-500); border:3px solid var(--cream-050); cursor:grab; box-shadow:0 1px 4px rgba(0,0,0,0.25); }
+  .reveal-slider::-moz-range-thumb{ width:20px; height:20px; border-radius:50%; background:var(--moss-500); border:3px solid var(--cream-050); cursor:grab; }
+  .reveal-hint{ font-size:0.78rem; margin-top:0.6rem; opacity:0.6; }
+
+  .pipe{ margin-top:2.2rem; display:flex; flex-direction:column; position:relative; padding-left:2.7rem; max-width:680px; }
+  .pnode{ position:relative; padding:0 0 1.7rem 0; display:flex; gap:1rem; }
+  .pnode:last-child{ padding-bottom:0; }
+  .pnode:before{ content:""; position:absolute; left:-2.7rem; top:1.6rem; bottom:-0.2rem; width:1px; background:var(--line-on-cream); }
+  .pnode:last-child:before{ display:none; }
+  .pn{ position:absolute; left:-3.06rem; top:0; width:1.6rem; height:1.6rem; border-radius:50%; background:var(--cream-050); border:1.5px solid var(--line-on-cream); display:flex; align-items:center; justify-content:center; font-size:0.72rem; font-weight:700; font-family:var(--font-display); transition:background .25s,color .25s,border-color .25s; }
+  .pnode.active .pn{ background:var(--moss-500); border-color:var(--moss-500); color:var(--ink-900); }
+  .pt{ font-weight:600; font-size:0.98rem; }
+  .pd{ font-size:0.87rem; opacity:0.72; line-height:1.5; margin-top:0.2rem; max-width:52ch; }
+  .branchrow{ display:flex; gap:0.7rem; margin-top:0.7rem; flex-wrap:wrap; }
+  .branchcard{ font-size:0.78rem; padding:0.5rem 0.8rem; border-radius:10px; font-weight:500; }
+  .branchcard.ok{ background:rgba(95,153,85,0.14); color:var(--risk-ok); }
+  .branchcard.warn{ background:rgba(201,150,61,0.16); color:var(--risk-warn); }
+  .playbtn{ margin-top:1.6rem; border:1px solid var(--line-on-cream); background:transparent; color:inherit; font-family:var(--font-body); font-size:0.85rem; font-weight:600; padding:0.65rem 1.2rem; border-radius:999px; cursor:pointer; }
+  .playbtn:hover{ background:rgba(19,32,22,0.05); }
+  .playbtn.solid{ background:var(--moss-500); border-color:var(--moss-500); color:var(--ink-900); }
+  .playbtn.solid:hover{ background:var(--moss-400); }
+  .playbtn.ghost{ opacity:0.7; }
+  .playbtn:disabled{ opacity:0.45; cursor:default; }
+
+  .guard-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-top:2.2rem; }
+  @media (max-width:900px){ .guard-grid{ grid-template-columns:1fr 1fr; } }
+  @media (max-width:600px){ .guard-grid{ grid-template-columns:1fr; } }
+
+  .metric-list{ margin-top:2.2rem; display:flex; flex-direction:column; gap:1.1rem; }
+  .metric{ display:grid; grid-template-columns:1.2fr 0.9fr; gap:1rem; padding:1.1rem 0; border-top:1px solid var(--line-on-cream); align-items:baseline; }
+  @media (max-width:640px){ .metric{ grid-template-columns:1fr; gap:0.3rem; } }
+  .metric .mt{ font-weight:600; font-size:0.98rem; }
+  .metric .mb{ font-size:0.86rem; opacity:0.7; }
+
+  .demo-grid{ display:grid; grid-template-columns:1fr 1fr; gap:1.4rem; margin-top:2.2rem; }
+  @media (max-width:860px){ .demo-grid{ grid-template-columns:1fr; } }
+  .demo-panel{ border-radius:18px; padding:1.4rem; border:1px solid var(--line-on-cream); font-size:0.86rem; line-height:1.6; }
+  .demo-panel.in{ background:rgba(19,32,22,0.04); }
+  .demo-panel.out{ background:var(--ink-900); color:var(--cream-100); }
+  .demo-tag{ font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:700; opacity:0.6; margin-bottom:0.7rem; display:block; }
+  .demo-textarea{ width:100%; background:transparent; border:1px solid var(--line-on-cream); border-radius:10px; padding:0.7rem; font-family:ui-monospace,'SFMono-Regular',Consolas,monospace; font-size:0.82rem; color:inherit; resize:vertical; }
+  .demo-actions{ display:flex; gap:0.7rem; margin-top:0.9rem; align-items:center; flex-wrap:wrap; }
+  .demo-status{ font-size:0.8rem; opacity:0.65; margin-top:0.6rem; min-height:1.1em; }
+  .kv{ display:flex; justify-content:space-between; gap:1rem; padding:0.5rem 0; border-top:1px solid rgba(244,236,219,0.12); font-size:0.84rem; }
+  .kv:first-of-type{ border-top:none; }
+  .kv .k{ opacity:0.6; flex-shrink:0; }
+  .risk-chip{ display:inline-flex; padding:0.18rem 0.6rem; border-radius:999px; font-size:0.72rem; font-weight:700; }
+
+  .archdiagram{ margin-top:2.4rem; max-width:720px; }
+  .archrow{ display:flex; gap:1rem; flex-wrap:wrap; }
+  .archbox{ border-radius:16px; padding:1.1rem 1.3rem; flex:1; min-width:220px; }
+  .archbox.app{ border:1.5px solid var(--moss-400); background:rgba(157,193,127,0.08); }
+  .archbox.base{ border:1.5px dashed var(--line-on-dark); background:rgba(244,236,219,0.04); margin-top:0.2rem; flex-basis:100%; }
+  .archbox.side{ border:1px dashed var(--line-on-dark); background:transparent; flex:1; }
+  .archlabel{ font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:700; opacity:0.6; margin-bottom:0.35rem; }
+  .archname{ font-weight:600; font-size:1rem; line-height:1.35; }
+  .archconnectors{ display:flex; justify-content:space-around; height:18px; margin:0 12%; }
+  .connline{ width:1.5px; background:var(--moss-400); opacity:0.6; }
+  .archnote{ font-size:0.85rem; opacity:0.7; margin-top:0.9rem; max-width:52ch; line-height:1.5; }
+  .archdesc{ font-size:0.88rem; opacity:0.78; margin:0.5rem 0 0; line-height:1.55; max-width:52ch; }
+
+  .footline{ margin-top:2.4rem; font-size:0.82rem; opacity:0.55; }
+
+  .scrollcue{ position:absolute; bottom:2.2rem; left:clamp(1.4rem,7vw,6.4rem); display:flex; align-items:center; gap:0.6rem; font-size:0.78rem; letter-spacing:0.04em; opacity:0.6; }
+  .scrollcue svg{ animation:bob 1.8s ease-in-out infinite; }
+  @keyframes bob{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(5px);} }
+
+  .fern{ position:absolute; bottom:0; right:0; opacity:0.3; pointer-events:none; }
+
+  .close-wrap{ text-align:left; }
+  .close-name{ margin-top:2.4rem; font-size:1rem; }
+  .close-name b{ font-weight:700; }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    *{ animation:none !important; transition:none !important; }
+  }
+
+  a{ color:inherit; }
+  :focus-visible{ outline:2px solid var(--moss-400); outline-offset:2px; }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<nav class="dotnav" id="dotnav" aria-label="Navegação da apresentação"></nav>
+
+<main>
+
+<!-- 01 O COMPROMISSO -->
+<section class="slide slide-dark" id="s1" data-name="O compromisso">
+  <div class="wrap">
+    <p class="eyebrow"><span class="idx">01 / 12</span> · Processo seletivo · IA Product Owner</p>
+    <h1 class="title title-hero">Em quatro meses, a mediana entre carta proposta e comitê sai de 75 dias para a faixa de 45 a 55, e o motivo do descarte passa a aparecer desde o dia zero</h1>
+    <p class="lede">Essa é a meta que eu assumo com este plano, sobre os 75% dos casos de descarte que já eram visíveis em fonte pública ou na matrícula antes de custarem dinheiro. O resto desta apresentação é o caminho até esse número.</p>
+    <p class="footline">Daniel · candidato a IA Product Owner · case prático diligência de terras</p>
+  </div>
+  <div class="scrollcue" aria-hidden="true">
+    <svg width="14" height="20" viewBox="0 0 14 20" fill="none"><rect x="1" y="1" width="12" height="18" rx="6" stroke="currentColor" stroke-width="1.4"/><circle cx="7" cy="6" r="1.4" fill="currentColor"/></svg>
+    role para navegar
+  </div>
+  <svg class="fern" width="340" height="420" viewBox="0 0 340 420" fill="none" aria-hidden="true">
+    <g stroke="#9dc17f" stroke-width="2" opacity="0.5" stroke-linecap="round">
+      <path d="M300 420 C 280 340, 260 260, 230 190" />
+      <path d="M230 190 L180 165 M230 190 L190 210" />
+      <path d="M245 220 L195 200 M245 220 L205 240" />
+      <path d="M262 253 L212 236 M262 253 L222 273" />
+      <path d="M278 288 L228 273 M278 288 L238 306" />
+      <path d="M290 325 L242 312 M290 325 L250 340" />
+    </g>
+  </svg>
+</section>
+
+<!-- 02 DIAGNÓSTICO -->
+<section class="slide slide-cream" id="s2" data-name="A prova, começando pelo problema">
+  <div class="wrap">
+    <p class="eyebrow"><span class="idx">02 / 12</span> · A prova começa pelo tamanho do problema</p>
+    <h2 class="title">Da carta proposta ao comitê, a mediana é 75 dias e o pior caso chega a 313</h2>
+    <p class="lede">O funil de captação converte bem até a carta proposta. Depois disso, o tempo se estica, e uma parte relevante das fazendas some do funil sem que o motivo tivesse precisado esperar tanto para aparecer.</p>
+    <div class="statrow">
+      <div class="stat"><div class="num">100 dias</div><div class="lbl">tempo médio da carta proposta ao comitê</div></div>
+      <div class="stat"><div class="num">313 dias</div><div class="lbl">o caso mais lento já registrado</div></div>
+      <div class="stat flag"><div class="num">12</div><div class="lbl">fazendas descartadas depois de meses de diligência</div></div>
+      <div class="stat flag"><div class="num">90 dias</div><div class="lbl">tempo médio até o descarte aparecer</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 A DECISÃO -->
+<section class="slide slide-dark" id="s3" data-name="A decisão">
+  <div class="wrap">
+    <p class="eyebrow"><span class="idx">03 / 12</span> · A escolha, e o que ela custa</p>
+    <h2 class="title">Escolho diligência de terras, porque o capital fica parado mais tempo e o sinal do problema já existe antes de gastarmos com ele</h2>
+    <div class="grid2">
+      <div class="card">
+        <h3>Diligência de terras</h3>
+        <p>Capital parado de 45 a 313 dias por negociação. Nove das doze fazendas descartadas tinham motivo visível em fonte pública ou na matrícula, antes da diligência jurídica externa começar. O problema é velocidade de detecção, não falta de informação.</p>
+      </div>
+      <div class="card">
+        <h3>Contratos comerciais</h3>
+        <p>Quatro contratos de mais de 400 páginas, obrigação espalhada entre cláusulas, esforço de acompanhamento manual que cresce a cada contrato novo. Dor real, mas mais estável, sem o mesmo custo de capital parado enquanto não é resolvida.</p>
+      </div>
+    </div>
+    <div class="cta-box">
+      <p>O que fica para depois: contratos comerciais entra na fase 2, reaproveitando a mesma camada de extração e rastreabilidade. Ampliar o uso de IA na empresa como um todo vira um movimento paralelo, com esforço mínimo, não o foco destes quatro meses.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 04 POR QUE ESTE, INTERATIVO -->
+<section class="slide slide-cream" id="s4" data-name="Por que este e não o outro">
+  <div class="wrap">
+    <p class="eyebrow"><span class="idx">04 / 12</span> · O dado que decide por onde atacar</p>
+    <h2 class="title">Das doze fazendas descartadas, nove tinham motivo visível antes de a diligência começar a custar dinheiro</h2>
+    <table class="dtable">
+      <thead><tr><th>Natureza do impeditivo</th><th>Casos</th><th>Era visível antes</th></tr></thead>
+      <tbody>
+        <tr><td>Sobreposição com gleba pública federal</td><td>4</td><td><span class="badge badge-yes">sim, em base pública</span></td></tr>
+        <tr><td>Cadeia dominial quebrada ou fraudada</td><td>3</td><td><span class="badge badge-yes">sim, na matrícula</span></td></tr>
+        <tr><td>Incongruência entre matrículas enviadas</td><td>2</td><td><span class="badge badge-yes">sim, na matrícula</span></td></tr>
+        <tr><td>Área sem desmembramento viável</td><td>1</td><td><span class="badge badge-part">parcialmente</span></td></tr>
+        <tr><td>Decisão de risco sobre passivo trabalhista</td><td>1</td><td><span class="badge badge-no">depende de certidão</span></td></tr>
+      </tbody>
+    </table>
+    <div class="reveal">
+      <div class="reveal-track">
+        <div class="reveal-layer reveal-base">
+          <span class="rk">Hoje</span>
+          <span class="rt">Sinal aparece aos 90 dias</span>
+          <span class="rd">Depois de coleta de documentos e diligência jurídica externa já pagas.</span>
+        </div>
+        <div class="reveal-layer reveal-over" id="revealOver">
+          <span class="rk">Com a checagem</span>
+          <span class="rt">Sinal aparece a partir do dia zero</span>
+          <span class="rd">Cruzando com base pública e matrícula assim que a carta proposta é assinada.</span>
+        </div>
+      </div>
+      <input type="range" min="0" max="100" value="50" class="reveal-slider" id="revealSlider" aria-label="Arraste para comparar hoje e com a checagem de IA">
+      <p class="reveal-hint">Arraste para comparar, do jeito que vocês já comparam imagem de satélite na home de vocês.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 05 ONDE A IA ENTRA -->
+<section class="slide slide-dark" id="s5" data-name="Onde a IA entra">
+  <div class="wrap">
+    <p class="eyebrow"><span class="idx">05 / 12</span> · A arquitetura, ponto a ponto</p>
+    <h2 class="title">A checagem roda junto com a coleta de documentos, não depois dela</h2>
+    <p class="flow-label">Hoje</p>
+    <div class="flow">
+      <div class="node">Carta proposta</div><span class="arrow">→</span>
+      <div class="node">Coleta de documentos · 65 dias</div><span class="arrow">→</span>
+      <div class="node">Diligência jurídica externa · 30 dias</div><span class="arrow">→</span>
+      <div class="node hit">Comitê ou descarte</div>
+    </div>
+    <p class="flow-label">Proposto</p>
+    <div class="flow">
+      <div class="node">Carta proposta</div><span class="arrow">→</span>
+      <div class="node hit">Coleta de documentos + checagem em paralelo</div><span class="arrow">→</span>
+      <div class="node">Diligência jurídica focada no que sobrou</div><span class="arrow">→</span>
+      <div class="node">Comitê ou descarte</div>
+    </div>
+    <div class="grid2" style="margin-top:2.6rem">
+      <div class="card">
+        <h3>Por onde começar</h3>
+        <p>Os dois impeditivos mais checáveis primeiro: sobreposição com gleba pública e cadeia dominial quebrada, cerca de 60% dos descartes. Fico de fora, por escolha, do passivo trabalhista e da recomendação final ao comitê, que segue humana.</p>
+      </div>
+      <div class="card">
+        <h3>O que a IA faz, exatamente</h3>
+        <p>Extrai os campos da matrícula, cruza contra base pública de terras, e devolve um resumo estruturado com o que precisa de atenção. Não lê o laudo por ninguém, não decide, prepara o material para quem decide.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 06 COMO NÃO ALUCINAR, EM FUNCIONAMENTO -->
+<section class="slide slide-cream" id="s6" data-name="Como não alucinar">
+  <div class="wrap">
+    <p class="eyebrow"><span class="idx">06 / 12</span> · As travas, em funcionamento</p>
+    <h2 class="title">Documento longo é onde o modelo mais inventa, então cada etapa trava antes de deixar passar a próxima</h2>
+    <div class="pipe" id="pipe">
+      <div class="pnode" data-step="1"><span class="pn">1</span><div><div class="pt">Documento chega</div><div class="pd">Matrícula, certidão ou laudo entram como texto bruto, nada mais.</div></div></div>
+      <div class="pnode" data-step="2"><span class="pn">2</span><div><div class="pt">Extração por schema fixo</div><div class="pd">Área, cadeia dominial, sobreposição. Nunca um resumo em texto livre.</div></div></div>
+      <div class="pnode" data-step="3"><span class="pn">3</span><div><div class="pt">Fonte citada em cada campo</div><div class="pd">Sem o trecho exato de onde saiu, o campo fica em branco, não é preenchido por dedução.</div></div></div>
+      <div class="pnode" data-step="4"><span class="pn">4</span><div><div class="pt">Verificação contra base externa</div><div class="pd">Sobreposição de área é confirmada na base pública de terras, nunca na memória do modelo.</div></div></div>
+      <div class="pnode branch" data-step="5">
+        <span class="pn">5</span>
+        <div>
+          <div class="pt">Confiança da extração</div>
+          <div class="pd">Toda saída carrega um nível de confiança, calculado a partir de quanto do schema foi preenchido com fonte.</div>
+          <div class="branchrow">
+            <div class="branchcard ok">alta ou média → segue para classificação</div>
+            <div class="branchcard warn">baixa → revisão humana obrigatória, fluxo automático para</div>
+          </div>
+        </div>
+      </div>
+      <div class="pnode" data-step="6"><span class="pn">6</span><div><div class="pt">Classificação de risco fechada</div><div class="pd">Convivível, corrigível ou impeditivo. Três caixas fixas, não interpretação caso a caso.</div></div></div>
+      <div class="pnode" data-step="7"><span class="pn">7</span><div><div class="pt">Comitê decide</div><div class="pd">Nenhum risco relevante é aceito sem decisão humana, exatamente como já funciona hoje.</div></div></div>
+    </div>
+    <button class="playbtn" id="playPipe" type="button">Ver o fluxo em ordem</button>
+  </div>
+</section>
+
+<!-- 07 ESCALA -->
+<section class="slide slide-dark" id="s7" data-name="Pensado para escalar">
+  <div class="wrap">
+    <p class="eyebrow"><span class="idx">07 / 12</span> · Escala</p>
+    <h2 class="title">O mesmo desenho que resolve terras hoje resolve contratos amanhã, sem recomeçar do zero</h2>
+    <p class="lede">A re.green fala em restaurar um milhão de hectares e em atuar em larga escala e em parceria. Isso só sustenta se o jeito de checar terra e contrato crescer sem crescer o time de revisão na mesma proporção.</p>
+    <div class="grid2">
+      <div class="card">
+        <h3>Documento novo, não sistema novo</h3>
+        <p>Um novo tipo de certidão ou de contrato vira um schema novo dentro da mesma esteira, não uma reconstrução. É a resposta direta para a pergunta de vocês sobre como um contrato novo entra no fluxo sem refazer tudo.</p>
+      </div>
+      <div class="card">
+        <h3>Volume sobe, revisão não sobe junto</h3>
+        <p>A triagem automática filtra o que está dentro do esperado. Só o que é sinalizado chega em jurídico. Mais terra e mais contrato não significam mais hora de revisão manual proporcional.</p>
+      </div>
+    </div>
+    <p class="footline">Acesso à ferramenta aberto ao time pelo Adapta, sem depender de fila de desenvolvimento para cada área que quiser usar.</p>
+  </div>
+</section>
+
+<!-- 08 MÉTRICAS -->
+<section class="slide slide-cream" id="s8" data-name="Como provar que funcionou">
+  <div class="wrap">
+    <p class="eyebrow"><span class="idx">08 / 12</span> · As métricas</p>
+    <h2 class="title">Quatro números, medidos contra a linha de base que vocês já têm</h2>
+    <div class="metric-list">
+      <div class="metric"><div class="mt">Mediana entre carta proposta e comitê</div><div class="mb">linha de base 75 dias. A faixa de 45 a 55 dias, citada na abertura, é a meta a validar com dados reais do piloto.</div></div>
+      <div class="metric"><div class="mt">Impeditivos detectados antes da diligência jurídica externa</div><div class="mb">linha de base perto de zero, já que hoje o sinal aparece em média aos 90 dias.</div></div>
+      <div class="metric"><div class="mt">Tempo da etapa de coleta de documentos</div><div class="mb">linha de base 65 dias, maior bloco isolado do funil, primeiro alvo de redução.</div></div>
+      <div class="metric"><div class="mt">Adoção, diligências novas passando pela checagem</div><div class="mb">sinal simples de uso real, acompanhado desde o mês 1.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 09 ROADMAP -->
+<section class="slide slide-dark" id="s9" data-name="Roadmap de 4 meses">
+  <div class="wrap">
+    <p class="eyebrow"><span class="idx">09 / 12</span> · Como construir, com o mínimo de dev</p>
+    <h2 class="title">Quatro ciclos curtos, não um projeto de cascata</h2>
+    <div class="steps">
+      <div class="step"><div class="n">01</div><div><div class="t">Mês 1 · Diagnóstico e desenho</div><div class="d">Acompanho o processo real com terras e jurídico, defino a taxonomia de risco junto com jurídico, monto um protótipo no Skip: matrícula entra, extração estruturada e checagem saem.</div></div></div>
+      <div class="step"><div class="n">02</div><div><div class="t">Mês 2 · Modo sombra</div><div class="d">Roda sobre diligências reais em paralelo ao processo humano, sem substituir ninguém. Comparo com o laudo humano e calibro a confiança.</div></div></div>
+      <div class="step"><div class="n">03</div><div><div class="t">Mês 3 · Piloto ao vivo</div><div class="d">Um subconjunto de negociações passa a usar o resumo da IA como primeiro rascunho. Meço tempo economizado na coleta e na leitura do laudo.</div></div></div>
+      <div class="step"><div class="n">04</div><div><div class="t">Mês 4 · Consolidar e decidir</div><div class="d">Métricas fechadas, playbook documentado para o time operar sem mim, decisão sobre reforço técnico para produtizar o que hoje é protótipo.</div></div></div>
+    </div>
+    <p class="footline">Reforço, se o piloto justificar: não um cientista de dados, um perfil de engenharia de dados e automação, para unir as três fontes que hoje não se enxergam.</p>
+  </div>
+</section>
+
+<!-- 10 DEMONSTRAÇÃO AO VIVO -->
+<section class="slide slide-cream" id="s10" data-name="Demonstração ao vivo">
+  <div class="wrap">
+    <p class="eyebrow"><span class="idx">10 / 12</span> · Na prática</p>
+    <h2 class="title">Um trecho de matrícula, extraído e classificado com a fonte sempre visível</h2>
+    <p class="lede">Texto fictício abaixo, editável. O botão chama o modelo ao vivo e aplica exatamente as travas da seção anterior, sobre o texto que estiver na caixa.</p>
+    <div class="demo-grid">
+      <div class="demo-panel in">
+        <span class="demo-tag">Entrada, edite se quiser</span>
+        <textarea id="demoInput" class="demo-textarea" rows="7">R-7, matrícula 4.521, Comarca de Eunápolis. Área de 812,4 ha. Transmitida por compra e venda em 14.03.2011, origem em desmembramento da matrícula 3.998. Constam averbações de reserva legal parcial. Consultada base do CAR em anexo.</textarea>
+        <div class="demo-actions">
+          <button id="runDemo" class="playbtn solid" type="button">Rodar extração com IA</button>
+          <button id="stopDemo" class="playbtn ghost" type="button" hidden>Parar</button>
+        </div>
+        <p class="demo-status" id="demoStatus"></p>
+      </div>
+      <div class="demo-panel out">
+        <span class="demo-tag" id="outTag" style="opacity:0.6">Exemplo ilustrativo</span>
+        <div id="outBody">
+          <div class="kv"><span class="k">Área</span><span>812,4 ha</span></div>
+          <div class="kv"><span class="k">Cadeia dominial</span><span>contínua, origem localizada</span></div>
+          <div class="kv"><span class="k">Sobreposição gleba pública</span><span>não identificada na base consultada</span></div>
+          <div class="kv"><span class="k">Confiança</span><span>alta</span></div>
+          <div class="kv"><span class="k">Fonte</span><span>matrícula 4.521, fl. 2 e 3</span></div>
+          <div class="kv"><span class="k">Classificação</span><span class="risk-chip" style="background:rgba(95,153,85,0.22);color:#bfe3ac">convivível</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="footline">A extração roda no backend deste projeto, a chave de API fica guardada como variável de ambiente no servidor e nunca é exposta no navegador.</p>
+  </div>
+</section>
+
+<!-- 11 FASE 2, DIAGRAMA DE REAPROVEITAMENTO -->
+<section class="slide slide-dark" id="s11" data-name="O que vem depois">
+  <div class="wrap">
+    <p class="eyebrow"><span class="idx">11 / 12</span> · O que vem depois dos quatro meses</p>
+    <h2 class="title">Contratos comerciais entra sobre a mesma base. Adoção ampla de IA anda ao lado, sem depender dela</h2>
+    <div class="archdiagram">
+      <div class="archrow">
+        <div class="archbox app">
+          <div class="archlabel">Piloto atual</div>
+          <div class="archname">Diligência de terras</div>
+        </div>
+        <div class="archbox app">
+          <div class="archlabel">Fase 2</div>
+          <div class="archname">Contratos comerciais</div>
+        </div>
+      </div>
+      <div class="archconnectors" aria-hidden="true"><span class="connline"></span><span class="connline"></span></div>
+      <div class="archbox base">
+        <div class="archlabel">Construído nos 4 meses</div>
+        <div class="archname">Camada compartilhada: extração estruturada + fonte citada + taxonomia de risco</div>
+      </div>
+      <p class="archnote">Documento longo entra, fatos estruturados e verificados saem. O mesmo desenho serve os dois problemas porque é o mesmo tipo de problema, só muda o schema.</p>
+    </div>
+    <div class="archrow" style="margin-top:2rem">
+      <div class="archbox side">
+        <div class="archlabel">Em paralelo, esforço mínimo, sem depender da camada acima</div>
+        <div class="archname">Novo patamar de adoção de IA</div>
+        <p class="archdesc">Os prompts e schemas do piloto viram material reaproveitável para outras áreas, como subproduto, não como projeto à parte. Um encontro mensal opcional mantém o hábito vivo depois do semestre.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 12 FECHAMENTO -->
+<section class="slide slide-dark" id="s12" data-name="Fechamento">
+  <div class="wrap close-wrap">
+    <p class="eyebrow"><span class="idx">12 / 12</span> · Fechando o círculo</p>
+    <h2 class="title title-hero">Esse foi o compromisso desde a primeira página. Tudo o que veio no meio foi o caminho até ele</h2>
+    <p class="lede">Mediana de 75 para a faixa de 45 a 55 dias, motivo do descarte visível desde o dia zero, comitê seguindo humano do início ao fim.</p>
+    <p class="close-name">Obrigado. <b>Daniel</b></p>
+  </div>
+</section>
+
+</main>
+
+<script>
+(function(){
+  var sections = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var dotnav = document.getElementById('dotnav');
+  sections.forEach(function(s){
+    var b = document.createElement('button');
+    b.className = 'dot';
+    b.setAttribute('aria-label', 'Ir para ' + (s.dataset.name || s.id));
+    b.dataset.target = s.id;
+    b.addEventListener('click', function(){
+      document.getElementById(s.id).scrollIntoView({behavior:'smooth', block:'start'});
+    });
+    dotnav.appendChild(b);
+  });
+  var dots = Array.prototype.slice.call(dotnav.querySelectorAll('.dot'));
+
+  var current = 0;
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        var idx = sections.indexOf(e.target);
+        if(idx > -1){
+          current = idx;
+          dots.forEach(function(d,i){ d.classList.toggle('active', i===idx); });
+        }
+      }
+    });
+  }, { threshold: 0.55 });
+  sections.forEach(function(s){ io.observe(s); });
+
+  var progress = document.getElementById('progress');
+  function updateProgress(){
+    var h = document.documentElement.scrollHeight - window.innerHeight;
+    var p = h > 0 ? (window.scrollY / h) * 100 : 0;
+    progress.style.width = p + '%';
+  }
+  window.addEventListener('scroll', updateProgress, { passive:true });
+  updateProgress();
+
+  window.addEventListener('keydown', function(ev){
+    var tag = (document.activeElement && document.activeElement.tagName) || '';
+    if(tag === 'TEXTAREA' || tag === 'INPUT') return;
+    if(['ArrowDown','PageDown',' '].indexOf(ev.key) > -1){
+      ev.preventDefault();
+      var next = sections[Math.min(current+1, sections.length-1)];
+      next.scrollIntoView({behavior:'smooth', block:'start'});
+    } else if(['ArrowUp','PageUp'].indexOf(ev.key) > -1){
+      ev.preventDefault();
+      var prev = sections[Math.max(current-1, 0)];
+      prev.scrollIntoView({behavior:'smooth', block:'start'});
+    }
+  });
+
+  var slider = document.getElementById('revealSlider');
+  var over = document.getElementById('revealOver');
+  if(slider && over){
+    var setReveal = function(v){ over.style.clipPath = 'inset(0 ' + (100 - v) + '% 0 0)'; };
+    setReveal(slider.value);
+    slider.addEventListener('input', function(){ setReveal(slider.value); });
+  }
+
+  var playBtn = document.getElementById('playPipe');
+  var pnodes = Array.prototype.slice.call(document.querySelectorAll('#pipe .pnode'));
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(playBtn){
+    playBtn.addEventListener('click', function(){
+      pnodes.forEach(function(n){ n.classList.remove('active'); });
+      if(reduceMotion){
+        pnodes.forEach(function(n){ n.classList.add('active'); });
+        return;
+      }
+      pnodes.forEach(function(n, i){
+        setTimeout(function(){ n.classList.add('active'); }, i*420);
+      });
+    });
+  }
+})();
+
+(function(){
+  var runBtn = document.getElementById('runDemo');
+  var stopBtn = document.getElementById('stopDemo');
+  var input = document.getElementById('demoInput');
+  var status = document.getElementById('demoStatus');
+  var outBody = document.getElementById('outBody');
+  var outTag = document.getElementById('outTag');
+  if(!runBtn) return;
+
+  var ctl = null;
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+  function kv(k,v){ return '<div class="kv"><span class="k">'+k+'</span><span>'+escapeHtml(v||'não informado')+'</span></div>'; }
+  function riskColor(c){
+    if(c === 'impeditivo') return {bg:'rgba(181,83,63,0.22)', fg:'#f2b6a9'};
+    if(c === 'corrigivel' || c === 'corrigível') return {bg:'rgba(201,150,61,0.22)', fg:'#f0d199'};
+    return {bg:'rgba(95,153,85,0.22)', fg:'#bfe3ac'};
+  }
+  function renderResult(data){
+    data = data || {};
+    var col = riskColor(String(data.classificacao||'').toLowerCase());
+    var confBaixa = String(data.confianca||'').toLowerCase().indexOf('baix') > -1;
+    var html = '';
+    html += kv('Área', data.area_ha);
+    html += kv('Cadeia dominial', data.cadeia_dominial);
+    html += kv('Sobreposição gleba pública', data.sobreposicao_gleba_publica);
+    html += kv('Confiança', data.confianca);
+    html += kv('Fonte', data.fonte);
+    html += '<div class="kv"><span class="k">Classificação</span><span class="risk-chip" style="background:'+col.bg+';color:'+col.fg+'">'+escapeHtml(data.classificacao||'-')+'</span></div>';
+    if(data.justificativa){ html += kv('Justificativa', data.justificativa); }
+    if(confBaixa){ html += '<div class="kv" style="border-top:1px solid rgba(201,150,61,0.4)"><span class="k" style="color:#f0d199">Trava acionada</span><span>confiança baixa, revisão humana obrigatória antes do comitê</span></div>'; }
+    outBody.innerHTML = html;
+  }
+
+  runBtn.addEventListener('click', function(){
+    var text = (input.value || '').trim();
+    if(!text) return;
+    ctl = new AbortController();
+    runBtn.disabled = true;
+    stopBtn.hidden = false;
+    status.textContent = 'Pensando...';
+    fetch('/api/extract', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({texto: text}),
+      signal: ctl.signal
+    }).then(function(r){
+      if(!r.ok){
+        return r.json().catch(function(){ return {}; }).then(function(j){
+          throw new Error(j.error || ('Erro do servidor, codigo ' + r.status));
+        });
+      }
+      return r.json();
+    }).then(function(data){
+      status.textContent = '';
+      outTag.textContent = 'Resultado gerado agora, ao vivo';
+      outTag.style.opacity = '0.85';
+      renderResult(data);
+      stopBtn.hidden = true;
+      runBtn.disabled = false;
+    }).catch(function(e){
+      stopBtn.hidden = true;
+      runBtn.disabled = false;
+      if(e && e.name === 'AbortError'){ status.textContent = 'Interrompido.'; return; }
+      status.textContent = (e && e.message) ? e.message : 'Falha ao chamar o servidor. Tente de novo.';
+    });
+  });
+
+  stopBtn.addEventListener('click', function(){
+    if(ctl) ctl.abort();
+  });
+})();
+</script>
+
+</body>
+</html>
